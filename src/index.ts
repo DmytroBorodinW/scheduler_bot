@@ -27,6 +27,9 @@ async function testConnection() {
   const monthSheet = getCurrentMonthName();
   const range = `${monthSheet}!${SHEET_RANGE}`;
 
+  console.log(`🔎 Спроба знайти таблицю ID: ${process.env.SPREADSHEET_ID}`);
+  console.log(`🔎 Шукаю діапазон: ${range}`);
+
   try {
     const res = await sheets.spreadsheets.values.get({
       spreadsheetId,

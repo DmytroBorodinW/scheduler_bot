@@ -1,0 +1,37 @@
+name: Send Worship Schedule
+
+on:
+  schedule:
+    # Запуск кожні 5 хвилин (для тестування)
+    - cron: "*/5 * * * *"
+    # Коли перевіриш, заміни на запуск щопонеділка о 09:00 UTC:
+    # - cron: '0 9 * * 1'
+  workflow_dispatch: # Дозволяє запускати скрипт вручну кнопкою в інтерфейсі GitHub
+
+jobs:
+  build-and-send:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/checkout@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run script
+        env:
+          # Передаємо секрети GitHub у змінні оточення процесу
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.CHAT_ID }}
+          SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
+          GOOGLE_CLIENT_EMAIL: ${{ secrets.GOOGLE_CLIENT_EMAIL }}
+          GOOGLE_PRIVATE_KEY: ${{ secrets.GOOGLE_PRIVATE_KEY }}
+          GOOGLE_PROJECT_ID: ${{ secrets.GOOGLE_PROJECT_ID }}
+          SHEET_RANGE: ${{ secrets.SHEET_RANGE }}
+        run: npx ts-node your-entry-point.ts # Заміни на шлях до свого головного файлу

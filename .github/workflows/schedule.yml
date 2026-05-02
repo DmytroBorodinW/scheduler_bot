@@ -24,6 +24,9 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Build project
+        run: npm run build
+
       - name: Run script
         env:
           # Передаємо секрети GitHub у змінні оточення процесу
@@ -34,4 +37,4 @@ jobs:
           GOOGLE_PRIVATE_KEY: ${{ secrets.GOOGLE_PRIVATE_KEY }}
           GOOGLE_PROJECT_ID: ${{ secrets.GOOGLE_PROJECT_ID }}
           SHEET_RANGE: ${{ secrets.SHEET_RANGE }}
-        run: npx ts-node src/index.ts # Заміни на шлях до свого головного файлу
+        run: npx ts-node dist/index.js # Заміни на шлях до свого головного файлу

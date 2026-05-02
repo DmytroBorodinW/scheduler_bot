@@ -11,6 +11,11 @@ const SPREAD_SHEET_ID = process.env.SPREADSHEET_ID;
 const SHEET_RANGE = process.env.SHEET_RANGE;
 
 async function testConnection() {
+  console.log(
+    "ENV CHECK:",
+    process.env.SPREADSHEET_ID ? "ID EXISTS" : "ID IS EMPTY",
+  );
+
   const auth = new google.auth.GoogleAuth({
     credentials: {
       client_email: process.env.GOOGLE_CLIENT_EMAIL,

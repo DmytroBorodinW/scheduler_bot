@@ -17,9 +17,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/checkout@v4
+        uses: actions/setup-node@v4 # ТУТ БУЛА ПОМИЛКА
         with:
           node-version: "20"
+          cache: "npm" # Додаємо кешування для швидкості
 
       - name: Install dependencies
         run: npm install
@@ -29,7 +30,6 @@ jobs:
 
       - name: Run script
         env:
-          # Передаємо секрети GitHub у змінні оточення процесу
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
           CHAT_ID: ${{ secrets.CHAT_ID }}
           SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
@@ -37,4 +37,4 @@ jobs:
           GOOGLE_PRIVATE_KEY: ${{ secrets.GOOGLE_PRIVATE_KEY }}
           GOOGLE_PROJECT_ID: ${{ secrets.GOOGLE_PROJECT_ID }}
           SHEET_RANGE: ${{ secrets.SHEET_RANGE }}
-        run: npx node dist/index.js # Заміни на шлях до свого головного файлу
+        run: node dist/index.js # ПРИБРАЛИ npx

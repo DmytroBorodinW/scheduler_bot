@@ -1,7 +1,6 @@
 import * as dotenv from "dotenv";
 import "dotenv/config";
 import { google } from "googleapis";
-import * as path from "path";
 import { generateDayMessage, parseWorshipSchedule } from "./parser.js";
 import { bot } from "./telegram.js";
 import { getCurrentMondayTimestamp, getCurrentMonthName } from "./utils.js";
@@ -13,7 +12,11 @@ const SHEET_RANGE = process.env.SHEET_RANGE;
 
 async function testConnection() {
   const auth = new google.auth.GoogleAuth({
-    keyFile: path.join(process.cwd(), "google-key.json"),
+    credentials: {
+      client_email: process.env.GOOGLE_CLIENT_EMAIL,
+      private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n"), // Важливо: повертаємо реальні переноси рядків
+      project_id: process.env.GOOGLE_PROJECT_ID,
+    },
     scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
   });
 

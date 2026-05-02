@@ -28,14 +28,15 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Debug Secret Length
+      - name: Hard Debug
         run: |
-          echo "Checking secrets presence..."
-          if [ -z "${{ secrets.SPREADSHEET_ID }}" ]; then
-            echo "❌ SPREADSHEET_ID is missing in GitHub Settings"
-          else
-            echo "✅ SPREADSHEET_ID is present (length: ${#SPREADSHEET_ID})"
-          fi
+          echo "--- START DEBUG ---"
+          if [ -z "$SPREADSHEET_ID" ]; then echo "SPREADSHEET_ID is NULL in env"; else echo "SPREADSHEET_ID has value"; fi
+          if [ -z "$BOT_TOKEN" ]; then echo "BOT_TOKEN is NULL in env"; else echo "BOT_TOKEN has value"; fi
+          echo "--- END DEBUG ---"
+        env:
+          SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
 
       - name: Run script
         env:

@@ -28,12 +28,13 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Check secret presence
+      - name: Debug Secret Length
         run: |
+          echo "Checking secrets presence..."
           if [ -z "${{ secrets.SPREADSHEET_ID }}" ]; then
-            echo "SECRET IS MISSING IN GITHUB SETTINGS"
+            echo "❌ SPREADSHEET_ID is missing in GitHub Settings"
           else
-            echo "SECRET IS DEFINED IN GITHUB SETTINGS"
+            echo "✅ SPREADSHEET_ID is present (length: ${#SPREADSHEET_ID})"
           fi
 
       - name: Run script

@@ -1,11 +1,11 @@
-import * as dotenv from "dotenv";
+// import * as dotenv from "dotenv";
 import "dotenv/config";
 import { google } from "googleapis";
 import { generateDayMessage, parseWorshipSchedule } from "./parser.js";
 import { bot } from "./telegram.js";
 import { getCurrentMondayTimestamp, getCurrentMonthName } from "./utils.js";
 
-dotenv.config();
+// dotenv.config();
 const CHAT_ID = process.env.CHAT_ID;
 const SPREAD_SHEET_ID = process.env.SPREADSHEET_ID;
 const SHEET_RANGE = process.env.SHEET_RANGE;

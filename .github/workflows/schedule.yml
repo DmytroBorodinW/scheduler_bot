@@ -28,6 +28,14 @@ jobs:
       - name: Build project
         run: npm run build
 
+      - name: Check secret presence
+        run: |
+          if [ -z "${{ secrets.SPREADSHEET_ID }}" ]; then
+            echo "SECRET IS MISSING IN GITHUB SETTINGS"
+          else
+            echo "SECRET IS DEFINED IN GITHUB SETTINGS"
+          fi
+
       - name: Run script
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}

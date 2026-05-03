@@ -1,11 +1,11 @@
-// import * as dotenv from "dotenv";
+import * as dotenv from "dotenv";
 import "dotenv/config";
 import { google } from "googleapis";
 import { generateDayMessage, parseWorshipSchedule } from "./parser.js";
 import { bot } from "./telegram.js";
 import { getCurrentMondayTimestamp, getCurrentMonthName } from "./utils.js";
 
-// dotenv.config();
+dotenv.config();
 const CHAT_ID = process.env.CHAT_ID;
 const SPREAD_SHEET_ID = process.env.SPREADSHEET_ID;
 const SHEET_RANGE = process.env.SHEET_RANGE;
@@ -54,12 +54,14 @@ async function testConnection() {
       // 1. Створюємо масив для збору повідомлень по кожному дню
       const dailyMessages: string[] = [];
 
-      Object.values(currentWeekDays).forEach((dayData: any) => {
-        const message = generateDayMessage(dayData);
-        if (message) {
-          dailyMessages.push(message);
-        }
-      });
+      Object.values(currentWeekDays)
+        .filter((dayData) => dayData.events.length)
+        .forEach((dayData: any) => {
+          const message = generateDayMessage(dayData);
+          if (message) {
+            dailyMessages.push(message);
+          }
+        });
 
       // 2. Якщо є повідомлення, з'єднуємо їх у одне велике
       if (dailyMessages.length > 0) {

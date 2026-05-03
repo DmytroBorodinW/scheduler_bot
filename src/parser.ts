@@ -4,7 +4,12 @@ import {
   SERVICE_DAYS,
   TEAM_MEMBERS,
 } from "./constants.js";
-import type { WorshipDay, WorshipSchedule } from "./types.js";
+import {
+  EventLocations,
+  TechEventKey,
+  type WorshipDay,
+  type WorshipSchedule,
+} from "./types.js";
 import { parseTableDate } from "./utils.js";
 
 export const generateDayMessage = (dayData: WorshipDay) => {
@@ -14,13 +19,13 @@ export const generateDayMessage = (dayData: WorshipDay) => {
 
   let message = `📅 <b>${dayData.date.toUpperCase()}</b>\n`;
 
-  // --- СПЕЦІАЛЬНА ЛОГІКА ДЛЯ СЕРЕДИ ---
+  // --- СПЕЦІАЛЬНА ЛОГІКА ДЛЯ СЕРЕДИ ТА НЕДІЛІ ---
   if (SERVICE_DAYS.includes(dayName)) {
     message += `\n${rules.mainEvent}\n`;
 
     // Шукаємо інструментал
     const instEvent = dayData.events.find(
-      (e: any) => e.key.includes("Inst") || e.key.includes("/"),
+      (e: any) => e.key.includes("Інст") || e.key.includes("/"),
     );
     if (instEvent) {
       message += `\n⏰ <b>${rules.rehearsalTime}</b> — ${rules.location}`;
@@ -29,10 +34,12 @@ export const generateDayMessage = (dayData: WorshipDay) => {
     }
 
     // Додаємо Звук та Апаратуру (без часу)
-    const soundEvent = dayData.events.find(
-      (e: any) => e.key.startsWith("S") && !e.key.startsWith("SE"),
+    const soundEvent = dayData.events.find((e: any) =>
+      e.key.includes(TechEventKey.SOUND),
     );
-    const gearEvent = dayData.events.find((e: any) => e.key.startsWith("SE"));
+    const gearEvent = dayData.events.find((e: any) =>
+      e.key.includes(TechEventKey.SOUND_EQUIPMENT),
+    );
 
     if (soundEvent) message += `\n🔊 <b>Звук:</b> ${soundEvent.mentions}`;
     if (gearEvent) message += `\n🎹 <b>Апаратура:</b> ${gearEvent.mentions}`;
@@ -43,11 +50,15 @@ export const generateDayMessage = (dayData: WorshipDay) => {
   // --- ЛОГІКА ДЛЯ ІНШИХ ДНІВ ---
   dayData.events.forEach((event: any) => {
     // Пропускаємо технічні ключі (S/SE), якщо це не середа
-    if (event.key.startsWith("S") || event.key.startsWith("SE")) return;
+    if (
+      event.key.includes(TechEventKey.SOUND) ||
+      event.key.includes(TechEventKey.SOUND_EQUIPMENT)
+    )
+      return;
 
     let eventTime = rules.time;
-    let eventLocation = rules.location;
-    let eventType = rules.type || rules.defaultType;
+    let eventLocation = event.location ? event.location : rules.location;
+    let eventType = rules.type;
 
     if (REHEARSAL_DAYS.includes(dayName)) {
       if (event.key.includes("/")) {
@@ -56,16 +67,9 @@ export const generateDayMessage = (dayData: WorshipDay) => {
         eventType = rules.instrumental.type;
       } else {
         eventTime = rules.vocal.time;
-        eventLocation = event.key.includes("Thu")
-          ? "на хаті"
-          : rules.vocal.location;
+        eventLocation = event.location ? event.location : rules.vocal.location;
         eventType = rules.vocal.type;
       }
-    } else {
-      // Вівторок та інші дні
-      eventTime = rules.time;
-      eventLocation = rules.location;
-      eventType = rules.defaultType;
     }
 
     message += `\n⏰ <b>${eventTime}</b> — ${eventLocation}`;
@@ -134,27 +138,33 @@ export const parseWorshipSchedule = (
       row.forEach((cell, idx) => {
         if (cell.trim() !== "" && monthWeek[currentMondayKey!][idx]) {
           // Розбиваємо клітинку по розділювачу '|'
-          // Очікуємо формат: "Лейбл | Ключ" (наприклад: "ВокалПт / ІнстП | VFri/InstFri")
           const parts = cell.split("|").map((s) => s.trim());
+          let label: string;
+          let key: string;
+          let location: string;
+          let mentions: string | string[];
 
           if (parts.length >= 2) {
-            const label = parts[0];
-            const key = parts[1];
-            const mentions = getMentions(key);
-
-            monthWeek[currentMondayKey!][idx].events.push({
-              label, // "ВокалПт / ІнстП"
-              key, // "VFri/InstFri"
-              mentions, // "@kosarchuk Наталя @Max_333_g @MmaximysS @ruslan_yolo"
-            });
+            label = parts[0];
+            key = parts[0];
+            mentions = getMentions(key);
+            location = parts[1];
+          } else {
+            label = cell;
+            key = cell;
+            mentions = getMentions(key);
+            location = EventLocations.MUSIC_ROOM;
           }
+
+          monthWeek[currentMondayKey!][idx].events.push({
+            label, // "ВокалПт / ІнстП"
+            key, // "ВокалПт / ІнстП"
+            mentions, // "@kosarchuk Наталя @Max_333_g @MmaximysS @ruslan_yolo"
+            location,
+          });
         }
       });
     }
-
-    // 3. Якщо рядок порожній — ми можемо або скинути ключ, або ні.
-    // Краще не скидати, поки не зустрінемо новий блок дат,
-    // щоб "підхоплювати" Sound/Gear, які йдуть через пробіл.
   });
   return monthWeek;
 };

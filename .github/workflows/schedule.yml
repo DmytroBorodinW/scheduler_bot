@@ -45,4 +45,6 @@ jobs:
           GOOGLE_PRIVATE_KEY: ${{ secrets.GOOGLE_PRIVATE_KEY }}
           GOOGLE_PROJECT_ID: ${{ secrets.GOOGLE_PROJECT_ID }}
           SHEET_RANGE: ${{ secrets.SHEET_RANGE }}
+          YOUTH_MINISTRY_SPREADSHEET_ID: ${{ secrets.YOUTH_MINISTRY_SPREADSHEET_ID }}
+          YOUTH_MINISTRY_SHEET_RANGE: ${{ secrets.YOUTH_MINISTRY_SHEET_RANGE }}
         run: node dist/index.js

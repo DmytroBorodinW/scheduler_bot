@@ -3,7 +3,7 @@ name: Send Worship Schedule
 on:
   schedule:
     # Запуск кожні 5 хвилин (для тестування)
-    - cron: "0 6 * * 1"
+    - cron: "0 4 * * 1"
   workflow_dispatch: # Залишаємо можливість ручного запуску
 
 jobs:

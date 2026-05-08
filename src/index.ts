@@ -105,7 +105,10 @@ const YOUTH_MINISTRY_SHEET_RANGE = process.env.YOUTH_MINISTRY_SHEET_RANGE;
 async function generateYouthMinistryTeamSchedule() {
   const sheets = authToSpreadSheetAPI();
 
-  if (!YOUTH_MINISTRY_SHEET_RANGE || !YOUTH_MINISTRY_SPREADSHEET_ID) return;
+  if (!YOUTH_MINISTRY_SHEET_RANGE || !YOUTH_MINISTRY_SPREADSHEET_ID) {
+    console.log("Не знайдено сікретів");
+    return;
+  }
   const range = getTableRange(YOUTH_MINISTRY_SHEET_RANGE);
 
   try {

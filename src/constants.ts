@@ -1,3 +1,5 @@
+import type { YouthMinistryWeekSch } from "./types.js";
+
 export const TEAM_MEMBERS: Record<string, string | string[]> = {
   ВокалЧт1: ["@luba_kovalska", "@MmaximysS", "@dmytroSB", "@lzve_tttth"],
   ВокалЧт2: ["@Max_333_g", "@nelyalosobyk", "@Dannusia", "@Nadiia_Borodin"],
@@ -67,3 +69,51 @@ export const SCHEDULE_RULES: Record<string, any> = {
 
 export const REHEARSAL_DAYS = ["вівторок", "четвер", "пʼятниця", "субота"];
 export const SERVICE_DAYS = ["неділя", "середа"];
+
+export const days: (keyof YouthMinistryWeekSch)[] = [
+  "Mon",
+  "Tue",
+  "Wed",
+  "Thu",
+  "Fri",
+  "Sat",
+  "Sun",
+];
+
+export const dayNames: Record<string, string> = {
+  Mon: "ПОНЕДІЛОК",
+  Tue: "ВІВТОРОК",
+  Wed: "СЕРЕДА",
+  Thu: "ЧЕТВЕР",
+  Fri: "П’ЯТНИЦЯ",
+  Sat: "СУБОТА",
+  Sun: "НЕДІЛЯ",
+};
+
+export const emojiMap: Record<string, string> = {
+  Спікер: "🗣️",
+  Спів: "🎹",
+  "Група прославлення": "🎹",
+  Ведучий: "🎤",
+  Молитва: "🇺🇦",
+  Звук: "🎧",
+  Апаратура: "🔊",
+  Слайди: "💻",
+  Гостинність: "☺️",
+  Тема: "📖",
+};
+
+export const monthNames = [
+  "СІЧНЯ",
+  "ЛЮТОГО",
+  "БЕРЕЗНЯ",
+  "КВІТНЯ",
+  "ТРАВНЯ",
+  "ЧЕРВНЯ",
+  "ЛИПНЯ",
+  "СЕРПНЯ",
+  "ВЕРЕСНЯ",
+  "ЖОВТНЯ",
+  "ЛИСТОПАДА",
+  "ГРУДНЯ",
+];

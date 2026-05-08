@@ -3,14 +3,14 @@ import {
   SCHEDULE_RULES,
   SERVICE_DAYS,
   TEAM_MEMBERS,
-} from "./constants.js";
+} from "../constants.js";
 import {
   EventLocations,
   TechEventKey,
   type WorshipDay,
   type WorshipSchedule,
-} from "./types.js";
-import { parseTableDate } from "./utils.js";
+} from "../types.js";
+import { parseTableDate } from "../utils.js";
 
 export const generateDayMessage = (dayData: WorshipDay) => {
   const dayName = dayData.date.split(",")[0].toLowerCase();

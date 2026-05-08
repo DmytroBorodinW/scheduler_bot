@@ -30,3 +30,9 @@ export const getCurrentMonthName = (): string => {
 
   return monthName; // Наприклад: "May"
 };
+
+export const getTableRange = (sheetRange: string) => {
+  const monthSheet = getCurrentMonthName();
+  const range = `${monthSheet}!${sheetRange}`;
+  return range;
+};

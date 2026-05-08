@@ -23,3 +23,15 @@ export interface WorshipWeek {
 }
 
 export type WorshipSchedule = Record<string, WorshipWeek>;
+
+export interface YouthMinistryWeekSch {
+  Mon: string;
+  Tue: string;
+  Wed: string;
+  Thu: string;
+  Fri: string;
+  Sat: string;
+  Sun: string;
+}
+
+export type YouthMInistryMonthSchedule = Record<string, YouthMinistryWeekSch>;

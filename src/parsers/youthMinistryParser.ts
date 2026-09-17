@@ -3,14 +3,14 @@ import type {
   YouthMInistryMonthSchedule,
   YouthMinistryWeekSch,
 } from "../types.js";
-import { getCurrentMondayTimestamp } from "../utils.js";
+import { cleanSheetText, getCurrentMondayTimestamp } from "../utils.js";
 
 /**
  * Допоміжна функція для створення таймстемпу з рядка 'Mon, 27.04.26'
  */
 function parseToTimestamp(dateStr: string): string {
   // Витягуємо тільки частину з датою: '27.04.26'
-  const cleanDate = dateStr.split(",")[1]?.trim();
+  const cleanDate = cleanSheetText(dateStr).split(",")[1]?.trim();
   if (!cleanDate) return Date.now().toString();
 
   const [day, month, year] = cleanDate.split(".").map(Number);

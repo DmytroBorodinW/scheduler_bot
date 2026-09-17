@@ -1,13 +1,28 @@
+/** Strip normal + unicode spaces from sheet cells (Sheets often adds NBSP). */
+export const cleanSheetText = (value: string): string =>
+  value.replace(/[\u00A0\u202F\u2007]/g, " ").trim();
+
 export const parseTableDate = (dateStr: string): Date => {
-  const cleanDate = dateStr.split(",")[1]?.trim() || dateStr;
+  const cleanDate =
+    cleanSheetText(dateStr).split(",")[1]?.trim() || cleanSheetText(dateStr);
   const [day, month, yearShort] = cleanDate.split(".").map(Number);
   const year = 2000 + yearShort;
 
   return new Date(year, month - 1, day);
 };
 
+/**
+ * Monday 00:00 local time for "this week".
+ * Override for testing: FORCE_WEEK=2026-10-12 (any date in that week).
+ */
 export const getCurrentMondayTimestamp = (): string => {
-  const now = new Date();
+  const forced = process.env.FORCE_WEEK?.trim();
+  const now = forced ? new Date(`${forced}T12:00:00`) : new Date();
+
+  if (forced && Number.isNaN(now.getTime())) {
+    throw new Error(`Invalid FORCE_WEEK="${forced}". Use YYYY-MM-DD.`);
+  }
+
   const day = now.getDay(); // 0 (Нд) - 6 (Сб)
 
   // Знаходимо зміщення до понеділка:
@@ -16,7 +31,8 @@ export const getCurrentMondayTimestamp = (): string => {
   // В інших випадках віднімаємо (day - 1).
   const diff = now.getDate() - day + (day === 0 ? -6 : 1);
 
-  const monday = new Date(now.setDate(diff));
+  const monday = new Date(now);
+  monday.setDate(diff);
   monday.setHours(0, 0, 0, 0); // Обнуляємо час для точного збігу ключа
 
   return monday.getTime().toString();
@@ -31,8 +47,13 @@ export const getCurrentMonthName = (): string => {
   return monthName; // Наприклад: "May"
 };
 
+/** Sheet tab name: SHEET_NAME env (e.g. October) or current English month. */
+export const getSheetTabName = (): string => {
+  return process.env.SHEET_NAME?.trim() || getCurrentMonthName();
+};
+
 export const getTableRange = (sheetRange: string) => {
-  const monthSheet = getCurrentMonthName();
+  const monthSheet = getSheetTabName();
   const range = `${monthSheet}!${sheetRange}`;
   return range;
 };

@@ -10,7 +10,41 @@ import {
   type WorshipDay,
   type WorshipSchedule,
 } from "../types.js";
-import { parseTableDate } from "../utils.js";
+import { cleanSheetText, parseTableDate } from "../utils.js";
+
+const JOINT_REHEARSAL = "Репетиція (Вокал + Інструментал)";
+
+const isCombinedTeam = (key: string) =>
+  key.includes("/") && key.includes("Вокал") && key.includes("Інст");
+
+const isSundayTeamKey = (key: string) => /Нд/.test(key);
+
+/** Labels for rehearsals that prepare Sunday service (ВокалНд / ІнстНд on Fri etc.). */
+const getSundayPrepType = (key: string): string => {
+  if (isCombinedTeam(key)) {
+    return "Репетиція до неділі (Вокал + Інструментал)";
+  }
+  if (key.includes("Вокал")) return "Вокал до неділі";
+  if (key.includes("Інст")) return "Інструментал до неділі";
+  return "Репетиція до неділі";
+};
+
+const getRehearsalType = (key: string, dayName: string, rules: any): string => {
+  // Sunday-team slots on other weekdays = prep for Sunday service
+  if (isSundayTeamKey(key) && dayName !== "неділя") {
+    return getSundayPrepType(key);
+  }
+
+  if (isCombinedTeam(key)) {
+    return JOINT_REHEARSAL;
+  }
+
+  if (key.includes("Інст")) {
+    return rules.instrumental?.type ?? JOINT_REHEARSAL;
+  }
+
+  return rules.vocal?.type ?? "Вокальна репетиція";
+};
 
 export const generateDayMessage = (dayData: WorshipDay) => {
   const dayName = dayData.date.split(",")[0].toLowerCase();
@@ -61,15 +95,18 @@ export const generateDayMessage = (dayData: WorshipDay) => {
     let eventType = rules.type;
 
     if (REHEARSAL_DAYS.includes(dayName)) {
-      if (event.key.includes("/")) {
+      const usesInstrumentalSlot =
+        isCombinedTeam(event.key) || event.key.includes("Інст");
+
+      if (usesInstrumentalSlot) {
         eventTime = rules.instrumental.time;
         eventLocation = rules.instrumental.location;
-        eventType = rules.instrumental.type;
       } else {
         eventTime = rules.vocal.time;
         eventLocation = event.location ? event.location : rules.vocal.location;
-        eventType = rules.vocal.type;
       }
+
+      eventType = getRehearsalType(event.key, dayName, rules);
     }
 
     message += `\n⏰ <b>${eventTime}</b> — ${eventLocation}`;
@@ -83,8 +120,8 @@ export const generateDayMessage = (dayData: WorshipDay) => {
 const getMentions = (key: string): string => {
   if (!key) return "";
 
-  // Розбиваємо ключ, якщо там є '/', наприклад 'VThu1/InstThu'
-  const keys = key.split("/").map((k) => k.trim());
+  // Розбиваємо ключ, якщо там є '/', наприклад 'ВокалЧт1 / ІнстЧт'
+  const keys = key.split("/").map((k) => cleanSheetText(k));
 
   const allMentions = keys.flatMap((k) => {
     const member = TEAM_MEMBERS[k];
@@ -106,9 +143,11 @@ export const parseWorshipSchedule = (
   let currentMondayKey: string | null = null;
 
   data.forEach((row) => {
+    const firstCell = row[0] ? cleanSheetText(row[0]) : "";
+
     // 1. Перевіряємо, чи цей рядок є "Заголовком дат" (шукаємо "Tue")
-    if (row[0] && row[0].includes("Tue")) {
-      const tueDate = parseTableDate(row[0]);
+    if (firstCell.includes("Tue")) {
+      const tueDate = parseTableDate(firstCell);
       // Створюємо ключ понеділка
       const mon = new Date(tueDate);
       mon.setDate(mon.getDate() - 1);
@@ -119,10 +158,12 @@ export const parseWorshipSchedule = (
       // Ініціалізуємо об'єкт тижня
       monthWeek[currentMondayKey] = {};
 
-      // Заповнюємо дати для кожного стовпця (0..3)
+      // Заповнюємо дати для кожного стовпця
       row.forEach((dateStr, idx) => {
+        const cleaned = cleanSheetText(dateStr);
+        if (!cleaned) return;
         monthWeek[currentMondayKey!][idx] = {
-          date: parseTableDate(dateStr).toLocaleString("uk-UA", {
+          date: parseTableDate(cleaned).toLocaleString("uk-UA", {
             weekday: "long",
             day: "numeric",
             month: "long",
@@ -134,11 +175,15 @@ export const parseWorshipSchedule = (
     }
 
     // 2. Якщо ми вже всередині якогось тижня і рядок не порожній
-    if (currentMondayKey && row.some((cell) => cell.trim() !== "")) {
+    if (
+      currentMondayKey &&
+      row.some((cell) => cleanSheetText(cell) !== "")
+    ) {
       row.forEach((cell, idx) => {
-        if (cell.trim() !== "" && monthWeek[currentMondayKey!][idx]) {
+        const cleanedCell = cleanSheetText(cell);
+        if (cleanedCell !== "" && monthWeek[currentMondayKey!][idx]) {
           // Розбиваємо клітинку по розділювачу '|'
-          const parts = cell.split("|").map((s) => s.trim());
+          const parts = cleanedCell.split("|").map((s) => cleanSheetText(s));
           let label: string;
           let key: string;
           let location: string;
@@ -150,16 +195,16 @@ export const parseWorshipSchedule = (
             mentions = getMentions(key);
             location = parts[1];
           } else {
-            label = cell;
-            key = cell;
+            label = cleanedCell;
+            key = cleanedCell;
             mentions = getMentions(key);
             location = EventLocations.MUSIC_ROOM;
           }
 
           monthWeek[currentMondayKey!][idx].events.push({
-            label, // "ВокалПт / ІнстП"
-            key, // "ВокалПт / ІнстП"
-            mentions, // "@kosarchuk Наталя @Max_333_g @MmaximysS @ruslan_yolo"
+            label, // "ВокалПт / ІнстПт"
+            key, // "ВокалПт / ІнстПт"
+            mentions, // "@kosarchuk Наталя @MmaximysS @ruslan_yolo @tania_zaritska"
             location,
           });
         }

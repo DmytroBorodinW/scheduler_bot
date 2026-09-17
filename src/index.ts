@@ -57,6 +57,12 @@ async function generateWorshipTeamScheduleFromSpreadsheet() {
     const schedule = parseWorshipSchedule(res.data.values);
     const currentWeekKey = getCurrentMondayTimestamp();
 
+    if (process.env.FORCE_WEEK) {
+      console.log(
+        `🧪 FORCE_WEEK=${process.env.FORCE_WEEK} → Monday ${new Date(Number(currentWeekKey)).toLocaleDateString()}`,
+      );
+    }
+
     if (schedule && schedule[currentWeekKey]) {
       const currentWeekDays: WorshipWeek = schedule[currentWeekKey];
 
@@ -93,6 +99,13 @@ async function generateWorshipTeamScheduleFromSpreadsheet() {
       }
     } else {
       console.log("😕 На цей тиждень розкладу не знайдено.");
+      if (schedule) {
+        const weeks = Object.keys(schedule)
+          .map((k) => new Date(Number(k)).toLocaleDateString())
+          .join(", ");
+        console.log(`Доступні тижні (понеділок): ${weeks}`);
+        console.log("Тест: FORCE_WEEK=2026-10-12 npm start");
+      }
     }
   } catch (err) {
     console.error("Помилка авторизації або доступу:", err);

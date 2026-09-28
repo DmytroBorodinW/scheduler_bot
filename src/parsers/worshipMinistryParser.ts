@@ -204,7 +204,7 @@ export const parseWorshipSchedule = (
           monthWeek[currentMondayKey!][idx].events.push({
             label, // "ВокалПт / ІнстПт"
             key, // "ВокалПт / ІнстПт"
-            mentions, // "@kosarchuk Наталя @MmaximysS @ruslan_yolo @tania_zaritska"
+            mentions,
             location,
           });
         }

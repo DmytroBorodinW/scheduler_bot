@@ -5,7 +5,7 @@ export const TEAM_MEMBERS: Record<string, string | string[]> = {
    ВокалЧт1: ['@luba_kovalska', '@y_n4ikkk', '@lzve_tttth'], // Любов, Яна, Ліза
    ВокалЧт2: ['@Nadiia_Borodin', '@Dannusia'], // Надя, Дануся
    ІнстЧт: ['@ostapkosar', '@Max_333_g', '@Kostymii', '@Dannusia'], // Остап, Макс Горобець, Костя, Дануся
-   ВокалПт: ['@kosarchuk', 'Наталя', '@MmaximysS'], // Юля, Наталя, Макс Зіньковський
+   ВокалПт: ['@kosarchuk', '@nelyalosobyk', '@MmaximysS'], // Юля, Неля, Макс Зіньковський
    ІнстПт: ['@kosarchuk', '@ruslan_yolo', '@tania_zaritska'], // Юля, Руслан, Таня З
    ВокалНд: ['@lzve_tttth', '@Nadiia_Borodin', '@kosarchuk'], // Ліза, Надя, Юля
    ІнстНд: ['@kosarchuk', '@ostapkosar', '@Max_333_g'], // Юля, Остап, Макс Горобець

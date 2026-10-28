@@ -113,6 +113,7 @@ export const emojiMap: Record<string, string> = {
    Слайди: '💻',
    Гостинність: '☺️',
    Тема: '📖',
+   Медіа: '🎥',
 };
 
 export const monthNames = [

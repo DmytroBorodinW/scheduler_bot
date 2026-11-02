@@ -1,14 +1,22 @@
 import type { YouthMinistryWeekSch } from './types.js';
 
+export const PERSON_HANDLES: Record<string, string> = {
+   Любов: '@luba_kovalska',
+   Яна: '@y_n4ikkk',
+   Ліза: '@lzve_tttth',
+   Надя: '@Nadiia_Borodin',
+   Дануся: '@Dannusia',
+   Остап: '@ostapkosar',
+   'Макс Горобець': '@Max_333_g',
+   Костя: '@Kostymii',
+   Юля: '@kosarchuk',
+   Неля: '@nelyalosobyk',
+   'Макс Зіньковський': '@MmaximysS',
+   Руслан: '@ruslan_yolo',
+   'Таня З': '@tania_zaritska',
+};
+
 export const TEAM_MEMBERS: Record<string, string | string[]> = {
-   // October sheet teams (Команди block)
-   ВокалЧт1: ['@luba_kovalska', '@y_n4ikkk', '@lzve_tttth'], // Любов, Яна, Ліза
-   ВокалЧт2: ['@Nadiia_Borodin', '@Dannusia'], // Надя, Дануся
-   ІнстЧт: ['@ostapkosar', '@Max_333_g', '@Kostymii', '@Dannusia'], // Остап, Макс Горобець, Костя, Дануся
-   ВокалПт: ['@kosarchuk', '@nelyalosobyk', '@MmaximysS'], // Юля, Неля, Макс Зіньковський
-   ІнстПт: ['@kosarchuk', '@ruslan_yolo', '@tania_zaritska'], // Юля, Руслан, Таня З
-   ВокалНд: ['@lzve_tttth', '@Nadiia_Borodin', '@kosarchuk'], // Ліза, Надя, Юля
-   ІнстНд: ['@kosarchuk', '@ostapkosar', '@Max_333_g'], // Юля, Остап, Макс Горобець
    'Апаратура: Остап': '@ostapkosar',
    'Апаратура: Діма': '@dmytroSB',
    'Апаратура: Микола': 'Микола',
@@ -19,6 +27,8 @@ export const TEAM_MEMBERS: Record<string, string | string[]> = {
    'Звук: Костя': '@Kostymii',
    'Звук: Віталік К': 'Віталік Кравчишин',
 };
+
+export const DEFAULT_TEAMS_CONFIG_RANGE = 'H30:Z45';
 
 export const SCHEDULE_RULES: Record<string, any> = {
    вівторок: {

@@ -1,8 +1,10 @@
 import * as dotenv from "dotenv";
 import "dotenv/config";
 import { google } from "googleapis";
+import { DEFAULT_TEAMS_CONFIG_RANGE } from "./constants.js";
 import {
   generateDayMessage,
+  parseTeamsConfig,
   parseWorshipSchedule,
 } from "./parsers/worshipMinistryParser.js";
 import {
@@ -17,6 +19,8 @@ dotenv.config();
 const CHAT_ID = process.env.CHAT_ID;
 const SPREAD_SHEET_ID = process.env.SPREADSHEET_ID;
 const SHEET_RANGE = process.env.SHEET_RANGE;
+const TEAMS_CONFIG_RANGE =
+  process.env.TEAMS_CONFIG_RANGE?.trim() || DEFAULT_TEAMS_CONFIG_RANGE;
 
 function authToSpreadSheetAPI() {
   const auth = new google.auth.GoogleAuth({
@@ -49,12 +53,22 @@ async function generateWorshipTeamScheduleFromSpreadsheet() {
   console.log(`🔎 Шукаю діапазон: ${range}`);
 
   try {
-    const res = await sheets.spreadsheets.values.get({
-      spreadsheetId: SPREAD_SHEET_ID,
-      range: range,
-    });
+    const teamsRange = getTableRange(TEAMS_CONFIG_RANGE);
+    console.log(`👥 Шукаю команди: ${teamsRange}`);
 
-    const schedule = parseWorshipSchedule(res.data.values);
+    const [res, teamsRes] = await Promise.all([
+      sheets.spreadsheets.values.get({
+        spreadsheetId: SPREAD_SHEET_ID,
+        range: range,
+      }),
+      sheets.spreadsheets.values.get({
+        spreadsheetId: SPREAD_SHEET_ID,
+        range: teamsRange,
+      }),
+    ]);
+
+    const teamsFromSheet = parseTeamsConfig(teamsRes.data.values);
+    const schedule = parseWorshipSchedule(res.data.values, teamsFromSheet);
     const currentWeekKey = getCurrentMondayTimestamp();
 
     if (process.env.FORCE_WEEK) {

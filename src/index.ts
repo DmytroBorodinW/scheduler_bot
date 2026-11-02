@@ -1,46 +1,35 @@
-import * as dotenv from "dotenv";
-import "dotenv/config";
-import { google } from "googleapis";
-import { DEFAULT_TEAMS_CONFIG_RANGE } from "./constants.js";
-import {
-  generateDayMessage,
-  parseTeamsConfig,
-  parseWorshipSchedule,
-} from "./parsers/worshipMinistryParser.js";
-import {
-  generateFullWeekSchedule,
-  parseScheduleToMonthObject,
-} from "./parsers/youthMinistryParser.js";
-import { bot } from "./telegram.js";
-import type { WorshipWeek } from "./types.js";
-import { getCurrentMondayTimestamp, getTableRange } from "./utils.js";
+import * as dotenv from 'dotenv';
+import 'dotenv/config';
+import { google } from 'googleapis';
+import { DEFAULT_TEAMS_CONFIG_RANGE } from './constants.js';
+import { generateDayMessage, parseTeamsConfig, parseWorshipSchedule } from './parsers/worshipMinistryParser.js';
+import { generateFullWeekSchedule, parseScheduleToMonthObject } from './parsers/youthMinistryParser.js';
+import { bot } from './telegram.js';
+import type { WorshipWeek } from './types.js';
+import { getCurrentMondayTimestamp, getTableRange } from './utils.js';
 
 dotenv.config();
 const CHAT_ID = process.env.CHAT_ID;
 const SPREAD_SHEET_ID = process.env.SPREADSHEET_ID;
 const SHEET_RANGE = process.env.SHEET_RANGE;
-const TEAMS_CONFIG_RANGE =
-  process.env.TEAMS_CONFIG_RANGE?.trim() || DEFAULT_TEAMS_CONFIG_RANGE;
+const TEAMS_CONFIG_RANGE = process.env.TEAMS_CONFIG_RANGE?.trim() || DEFAULT_TEAMS_CONFIG_RANGE;
 
 function authToSpreadSheetAPI() {
   const auth = new google.auth.GoogleAuth({
     credentials: {
       client_email: process.env.GOOGLE_CLIENT_EMAIL,
-      private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n"), // Важливо: повертаємо реальні переноси рядків
+      private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'), // Важливо: повертаємо реальні переноси рядків
       project_id: process.env.GOOGLE_PROJECT_ID,
     },
-    scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
+    scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
   });
 
-  const sheets = google.sheets({ version: "v4", auth });
+  const sheets = google.sheets({ version: 'v4', auth });
   return sheets;
 }
 
 async function generateWorshipTeamScheduleFromSpreadsheet() {
-  console.log(
-    "ENV CHECK:",
-    process.env.SPREADSHEET_ID ? "ID EXISTS" : "ID IS EMPTY",
-  );
+  console.log('ENV CHECK:', process.env.SPREADSHEET_ID ? 'ID EXISTS' : 'ID IS EMPTY');
 
   if (!SPREAD_SHEET_ID || !SHEET_RANGE) return;
 
@@ -73,22 +62,20 @@ async function generateWorshipTeamScheduleFromSpreadsheet() {
 
     if (process.env.FORCE_WEEK) {
       console.log(
-        `🧪 FORCE_WEEK=${process.env.FORCE_WEEK} → Monday ${new Date(Number(currentWeekKey)).toLocaleDateString()}`,
+        `🧪 FORCE_WEEK=${process.env.FORCE_WEEK} → Monday ${new Date(Number(currentWeekKey)).toLocaleDateString()}`
       );
     }
 
     if (schedule && schedule[currentWeekKey]) {
       const currentWeekDays: WorshipWeek = schedule[currentWeekKey];
 
-      console.log(
-        `📌 Розклад на поточний тиждень (${new Date(Number(currentWeekKey)).toLocaleDateString()}):`,
-      );
+      console.log(`📌 Розклад на поточний тиждень (${new Date(Number(currentWeekKey)).toLocaleDateString()}):`);
 
       // 1. Створюємо масив для збору повідомлень по кожному дню
       const dailyMessages: string[] = [];
 
       Object.values(currentWeekDays)
-        .filter((dayData) => dayData.events.length)
+        .filter(dayData => dayData.events.length)
         .forEach((dayData: any) => {
           const message = generateDayMessage(dayData);
           if (message) {
@@ -99,30 +86,28 @@ async function generateWorshipTeamScheduleFromSpreadsheet() {
       // 2. Якщо є повідомлення, з'єднуємо їх у одне велике
       if (dailyMessages.length > 0) {
         // Використовуємо розділювач, наприклад, лінію або подвійний перенос
-        const finalMessage = dailyMessages.join("\n" + "—".repeat(20) + "\n");
+        const finalMessage = dailyMessages.join('\n' + '—'.repeat(20) + '\n');
 
         // 3. Відправляємо ОДНЕ повідомлення
         bot.telegram
-          .sendMessage(CHAT_ID ? CHAT_ID : "", finalMessage, {
-            parse_mode: "HTML",
+          .sendMessage(CHAT_ID ? CHAT_ID : '', finalMessage, {
+            parse_mode: 'HTML',
           })
-          .then(() =>
-            console.log("✅ Розклад на тиждень надіслано одним повідомленням!"),
-          )
-          .catch((err) => console.error("❌ Помилка відправки:", err));
+          .then(() => console.log('✅ Розклад на тиждень надіслано одним повідомленням!'))
+          .catch(err => console.error('❌ Помилка відправки:', err));
       }
     } else {
-      console.log("😕 На цей тиждень розкладу не знайдено.");
+      console.log('😕 На цей тиждень розкладу не знайдено.');
       if (schedule) {
         const weeks = Object.keys(schedule)
-          .map((k) => new Date(Number(k)).toLocaleDateString())
-          .join(", ");
+          .map(k => new Date(Number(k)).toLocaleDateString())
+          .join(', ');
         console.log(`Доступні тижні (понеділок): ${weeks}`);
-        console.log("Тест: FORCE_WEEK=2026-10-12 npm start");
+        console.log('Тест: FORCE_WEEK=2026-10-12 npm start');
       }
     }
   } catch (err) {
-    console.error("Помилка авторизації або доступу:", err);
+    console.error('Помилка авторизації або доступу:', err);
   }
 }
 
@@ -133,7 +118,7 @@ async function generateYouthMinistryTeamSchedule() {
   const sheets = authToSpreadSheetAPI();
 
   if (!YOUTH_MINISTRY_SHEET_RANGE || !YOUTH_MINISTRY_SPREADSHEET_ID) {
-    console.log("Не знайдено сікретів");
+    console.log('Не знайдено сікретів');
     return;
   }
   const range = getTableRange(YOUTH_MINISTRY_SHEET_RANGE);
@@ -145,7 +130,7 @@ async function generateYouthMinistryTeamSchedule() {
     });
 
     if (!res.data.values) {
-      console.error("Розклад не знайдено:");
+      console.error('Розклад не знайдено:');
       return;
     }
 
@@ -153,16 +138,14 @@ async function generateYouthMinistryTeamSchedule() {
     const message = generateFullWeekSchedule(schedule);
 
     bot.telegram
-      .sendMessage(CHAT_ID ? CHAT_ID : "", message, {
-        parse_mode: "HTML",
+      .sendMessage(CHAT_ID ? CHAT_ID : '', message, {
+        parse_mode: 'HTML',
       })
-      .then(() =>
-        console.log("✅ Розклад на тиждень надіслано одним повідомленням!"),
-      )
-      .catch((err) => console.error("❌ Помилка відправки:", err));
+      .then(() => console.log('✅ Розклад на тиждень надіслано одним повідомленням!'))
+      .catch(err => console.error('❌ Помилка відправки:', err));
     console.log(message);
   } catch (err) {
-    console.error("Помилка авторизації або доступу:", err);
+    console.error('Помилка авторизації або доступу:', err);
   }
 }
 

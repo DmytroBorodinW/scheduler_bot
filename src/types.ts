@@ -1,11 +1,11 @@
 export enum TechEventKey {
-  SOUND = "Звук",
-  SOUND_EQUIPMENT = "Апаратура",
+  SOUND = 'Звук',
+  SOUND_EQUIPMENT = 'Апаратура',
 }
 
 export enum EventLocations {
-  HOME = "на хаті",
-  MUSIC_ROOM = "музикалка",
+  HOME = 'на хаті',
+  MUSIC_ROOM = 'музикалка',
 }
 
 export interface WorshipEvent {
